@@ -91,6 +91,8 @@ namespace Microsoft.AspNetCore.SignalR
 
         internal HubCallerContext HubCallerContext { get; }
 
+        internal List<Task> ActiveHubInvocations { get; } = new List<Task>();
+
         internal Exception CloseException { get; private set; }
 
         /// <summary>
