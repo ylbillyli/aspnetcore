@@ -76,6 +76,7 @@ namespace Microsoft.AspNetCore.SignalR
 
             var maxInvokes = contextOptions.MaximumParallelInvocations;
             ActiveInvocationLimit = new SemaphoreSlim(maxInvokes - 1, maxInvokes);
+            MaxInvokes = contextOptions.MaximumParallelInvocations;
         }
 
         internal StreamTracker StreamTracker
@@ -95,6 +96,7 @@ namespace Microsoft.AspNetCore.SignalR
         internal HubCallerContext HubCallerContext { get; }
 
         internal SemaphoreSlim ActiveInvocationLimit { get; }
+        internal int MaxInvokes { get; }
 
         internal Exception CloseException { get; private set; }
 
