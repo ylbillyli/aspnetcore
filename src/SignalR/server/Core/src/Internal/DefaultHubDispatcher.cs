@@ -257,7 +257,7 @@ namespace Microsoft.AspNetCore.SignalR.Internal
             else
             {
                 bool isStreamCall = descriptor.StreamingParameters != null;
-                if (!isStreamCall && !isStreamResponse)
+                if (connection.ActiveInvocationLimit != null && !isStreamCall && !isStreamResponse)
                 {
                     return connection.ActiveInvocationLimit.RunAsync(state =>
                     {
