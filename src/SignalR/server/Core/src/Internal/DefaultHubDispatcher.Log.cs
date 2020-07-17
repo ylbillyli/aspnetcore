@@ -77,6 +77,9 @@ namespace Microsoft.AspNetCore.SignalR.Internal
             private static readonly Action<ILogger, string, Exception> _invalidHubParameters =
                 LoggerMessage.Define<string>(LogLevel.Debug, new EventId(22, "InvalidHubParameters"), "Parameters to hub method '{HubMethod}' are incorrect.");
 
+            private static readonly Action<ILogger, string, Exception> _invocationIdInUse =
+                LoggerMessage.Define<string>(LogLevel.Debug, new EventId(23, "InvocationIdInUse"), "Invocation ID '{InvocationId}' is already in use.");
+
             public static void ReceivedHubInvocation(ILogger logger, InvocationMessage invocationMessage)
             {
                 _receivedHubInvocation(logger, invocationMessage, null);
@@ -185,6 +188,11 @@ namespace Microsoft.AspNetCore.SignalR.Internal
             public static void InvalidHubParameters(ILogger logger, string hubMethod, Exception exception)
             {
                 _invalidHubParameters(logger, hubMethod, exception);
+            }
+
+            public static void InvocationIdInUse(ILogger logger, string InvocationId)
+            {
+                _invocationIdInUse(logger, InvocationId, null);
             }
         }
     }
