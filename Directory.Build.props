@@ -154,6 +154,7 @@
     <ProjectReference
       Include="$(RepoRoot)src\Analyzers\Internal.AspNetCore.Analyzers\src\Internal.AspNetCore.Analyzers.csproj"
       PrivateAssets="All"
+      ReferenceOutputAssemblies="false"
       Version="$(InternalAspNetCoreAnalyzersPackageVersion)"
       IsImplicitlyDefined="true" />
   </ItemGroup>
