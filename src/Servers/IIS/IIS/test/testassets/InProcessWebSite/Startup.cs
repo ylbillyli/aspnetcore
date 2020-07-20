@@ -1098,22 +1098,6 @@ namespace TestSite
             await context.Response.WriteAsync(body);
         }
 
-        private TaskCompletionSource<object> _trailersReceivedForNoBody = new TaskCompletionSource<object>();
-
-        public async Task ResponseTrailers_CompleteAsyncNoBody_TrailersSent(HttpContext context)
-        {
-            context.Response.AppendTrailer("trailername", "TrailerValue");
-            await context.Response.CompleteAsync();
-            // second request.
-            await _trailersReceivedForNoBody.Task;
-        }
-
-        public Task ResponseTrailers_CompleteAsyncNoBody_TrailersSent_Complete(HttpContext context)
-        {
-            _trailersReceivedForNoBody.SetResult(null);
-            return Task.FromResult(0);
-        }
-
         private TaskCompletionSource<object> _trailersReceivedForBody = new TaskCompletionSource<object>();
         public async Task ResponseTrailers_CompleteAsyncWithBody_TrailersSent(HttpContext context)
         {

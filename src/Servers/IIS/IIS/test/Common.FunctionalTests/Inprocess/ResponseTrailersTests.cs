@@ -155,29 +155,6 @@ namespace Microsoft.AspNetCore.Server.IIS.FunctionalTests
             Assert.Empty(response.TrailingHeaders);
         }
 
-        [ConditionalFact]
-        public async Task ResponseTrailers_CompleteAsyncNoBody_TrailersSent()
-        {
-            var deploymentParameters = GetHttpsDeploymentParameters();
-            var deploymentResult = await DeployAsync(deploymentParameters);
-
-            var response = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_CompleteAsyncNoBody_TrailersSent");
-
-            response.EnsureSuccessStatusCode();
-
-            Assert.Equal(HttpVersion.Version20, response.Version);
-            var bodyTask = response.Content.ReadAsStringAsync();
-            Assert.False(bodyTask.IsCompleted);
-
-            Assert.NotEmpty(response.TrailingHeaders);
-            Assert.Equal("TrailerValue", response.TrailingHeaders.GetValues("TrailerName").Single());
-
-            var completeResponse = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_CompleteAsyncNoBody_TrailersSent_Complete");
-            completeResponse.EnsureSuccessStatusCode();
-            Assert.Equal(HttpVersion.Version20, completeResponse.Version);
-            Assert.Empty(await bodyTask);
-        }
-
         private IISDeploymentParameters GetHttpsDeploymentParameters()
         {
             var port = TestPortHelper.GetNextSSLPort();
