@@ -78,20 +78,20 @@ namespace Microsoft.AspNetCore.Server.IIS.FunctionalTests
         }
 
         [ConditionalFact]
-        public async Task ResponseTrailers_WithContentLengthBody_TrailersNotSent()
+        public async Task ResponseTrailers_WithContentLengthBody_TrailersSent()
         {
             var body = "Hello World";
 
             var deploymentParameters = GetHttpsDeploymentParameters();
             var deploymentResult = await DeployAsync(deploymentParameters);
 
-            var response = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_WithContentLengthBody_TrailersNotSent");
+            var response = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_WithContentLengthBody_TrailersSent");
 
             response.EnsureSuccessStatusCode();
             Assert.Equal(HttpVersion.Version20, response.Version);
-            Assert.Equal(body.Length.ToString(CultureInfo.InvariantCulture), response.Content.Headers.GetValues(HeaderNames.ContentLength).Single());
             Assert.Equal(body, await response.Content.ReadAsStringAsync());
-            Assert.Empty(response.TrailingHeaders);
+            Assert.NotEmpty(response.TrailingHeaders);
+            Assert.Equal("Trailer Value", response.TrailingHeaders.GetValues("TrailerName").Single());
         }
 
         [ConditionalFact]

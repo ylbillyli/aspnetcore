@@ -1064,12 +1064,12 @@ namespace TestSite
             context.Response.AppendTrailer("TrailerName", "Trailer Value");
         }
 
-        public async Task ResponseTrailers_WithContentLengthBody_TrailersNotSent(HttpContext context)
+        public async Task ResponseTrailers_WithContentLengthBody_TrailersSent(HttpContext context)
         {
             var body = "Hello World";
             context.Response.ContentLength = body.Length;
             await context.Response.WriteAsync(body);
-            Assert.Throws<InvalidOperationException>(() => context.Response.AppendTrailer("TrailerName", "Trailer Value"));
+            context.Response.AppendTrailer("TrailerName", "Trailer Value");
         }
 
         public async Task ResponseTrailers_WithTrailersBeforeContentLengthBody_TrailersSent(HttpContext context)
@@ -1099,6 +1099,7 @@ namespace TestSite
         }
 
         private TaskCompletionSource<object> _trailersReceivedForNoBody = new TaskCompletionSource<object>();
+
         public async Task ResponseTrailers_CompleteAsyncNoBody_TrailersSent(HttpContext context)
         {
             context.Response.AppendTrailer("trailername", "TrailerValue");
