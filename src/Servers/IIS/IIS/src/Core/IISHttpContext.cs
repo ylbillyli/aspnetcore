@@ -121,12 +121,6 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
         private HeaderCollection HttpResponseTrailers => _trailers ??= new HeaderCollection(checkTrailers: true);
         internal bool HasTrailers => _trailers?.Count > 0;
 
-        // Trailers are supported on this OS, it's HTTP/2, and the app added a Trailer response header to announce trailers were intended.
-        // Needed to delay the completion of Content-Length responses.
-        internal bool TrailersExpected => HasTrailers
-            || (NativeMethods.HttpSupportTrailer(_pInProcessHandler) && HttpVersion >= System.Net.HttpVersion.Version20
-                    && HttpResponseHeaders.ContainsKey(HttpKnownHeaderNames.Trailer));
-
         internal HttpApiTypes.HTTP_VERB KnownMethod { get; private set; }
 
         private bool HasStartedConsumingRequestBody { get; set; }
