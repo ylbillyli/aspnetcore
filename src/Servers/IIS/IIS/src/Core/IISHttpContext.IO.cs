@@ -172,7 +172,6 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
                             if (HasTrailers && NativeMethods.HttpSupportTrailer(_pInProcessHandler))
                             {
                                 SetResponseTrailers();
-                                await AsyncIO.FlushAsync(moreData: true);
                             }
 
                             break;

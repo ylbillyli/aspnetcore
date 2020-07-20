@@ -575,46 +575,6 @@ http_supports_trailers(
     return 0;
 }
 
-//EXTERN_C __MIDL_DECLSPEC_DLLEXPORT
-//HRESULT
-//http_delete_trailer(
-//    _In_ IN_PROCESS_HANDLER* pInProcessHandler
-//)
-//{
-//    //IHttpResponse4* pHttpResponse = (IHttpResponse4*)pInProcessHandler->QueryHttpContext()->GetResponse();
-//
-//}
-//
-//EXTERN_C __MIDL_DECLSPEC_DLLEXPORT
-//HRESULT
-//http_get_trailer(
-//    _In_ IN_PROCESS_HANDLER* pInProcessHandler
-//)
-//{
-//    //IHttpResponse4* pHttpResponse = (IHttpResponse4*)pInProcessHandler->QueryHttpContext()->GetResponse();
-//
-//}
-
-//EXTERN_C __MIDL_DECLSPEC_DLLEXPORT
-//HRESULT
-//http_reset_stream(
-//    _In_ IN_PROCESS_HANDLER* pInProcessHandler
-//)
-//{
-//    IHttpResponse4* pHttpResponse = (IHttpResponse4*)pInProcessHandler->QueryHttpContext()->GetResponse();
-//
-//}
-//
-//EXTERN_C __MIDL_DECLSPEC_DLLEXPORT
-//HRESULT
-//http_send_needs_go_away(
-//    _In_ IN_PROCESS_HANDLER* pInProcessHandler
-//)
-//{
-//    IHttpResponse4* pHttpResponse = (IHttpResponse4*)pInProcessHandler->QueryHttpContext()->GetResponse();
-//
-//}
-
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT
 HRESULT
 http_response_set_unknown_trailer(
