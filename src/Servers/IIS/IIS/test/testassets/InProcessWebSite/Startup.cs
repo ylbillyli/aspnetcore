@@ -1041,6 +1041,13 @@ namespace TestSite
             return Task.FromResult(0);
         }
 
+        public Task ResponseTrailers_HTTP1_TrailersNotAvailable(HttpContext context)
+        {
+            Assert.Equal("HTTP/1.1", context.Request.Protocol);
+            Assert.False(context.Response.SupportsTrailers());
+            return Task.FromResult(0);
+        }
+
         public Task ResponseTrailers_ProhibitedTrailers_Blocked(HttpContext context)
         {
             Assert.True(context.Response.SupportsTrailers());
@@ -1098,22 +1105,7 @@ namespace TestSite
             await context.Response.WriteAsync(body);
         }
 
-        private TaskCompletionSource<object> _trailersReceivedForBody = new TaskCompletionSource<object>();
-        public async Task ResponseTrailers_CompleteAsyncWithBody_TrailersSent(HttpContext context)
-        {
-            await context.Response.WriteAsync("Hello World");
-            context.Response.AppendTrailer("TrailerName", "Trailer Value");
-            await context.Response.CompleteAsync();
-            await _trailersReceivedForBody.Task;
-        }
-
-        public Task ResponseTrailers_CompleteAsyncWithBody_TrailersSent_Complete(HttpContext context)
-        {
-            _trailersReceivedForBody.SetResult(null);
-            return Task.FromResult(0);
-        }
-
-        public Task ResponseTrailers_MultipleValues_SentAsSeperateHeaders(HttpContext context)
+        public Task ResponseTrailers_MultipleValues_SentAsSeparateHeaders(HttpContext context)
         {
             context.Response.AppendTrailer("trailername", new StringValues(new[] { "TrailerValue0", "TrailerValue1" }));
             return Task.FromResult(0);

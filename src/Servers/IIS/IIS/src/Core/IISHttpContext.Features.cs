@@ -65,7 +65,7 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
             _currentIServerVariablesFeature = this;
             _currentIHttpMaxRequestBodySizeFeature = this;
             _currentITlsConnectionFeature = this;
-            _currentIHttpResponseTrailersFeature = this;
+            _currentIHttpResponseTrailersFeature = GetResponseTrailersFeature();
         }
 
         internal object FastFeatureGet(Type key)

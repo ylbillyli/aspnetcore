@@ -142,9 +142,9 @@ namespace Microsoft.AspNetCore.Server.IIS
         private static extern unsafe int http_response_set_unknown_header(IntPtr pInProcessHandler, byte* pszHeaderName, byte* pszHeaderValue, ushort usHeaderValueLength, bool fReplace);
 
         [DllImport(AspNetCoreModuleDll)]
-        private static extern unsafe int http_supports_trailers(IntPtr pInProcessHandler, out bool supportsTrailers);
+        private static extern unsafe int http_has_response4(IntPtr pInProcessHandler, out bool isResponse4);
         [DllImport(AspNetCoreModuleDll)]
-        private static extern unsafe int http_response_set_unknown_trailer(IntPtr pInProcessHandler, byte* pszHeaderName, byte* pszHeaderValue, ushort usHeaderValueLength);
+        private static extern unsafe int http_response_set_trailer(IntPtr pInProcessHandler, byte* pszHeaderName, byte* pszHeaderValue, ushort usHeaderValueLength);
 
         [DllImport(AspNetCoreModuleDll)]
         private static extern unsafe int http_response_set_known_header(IntPtr pInProcessHandler, int headerId, byte* pHeaderValue, ushort length, bool fReplace);
@@ -313,15 +313,15 @@ namespace Microsoft.AspNetCore.Server.IIS
             }
         }
 
-        internal static unsafe void HttpResponseSetUnknownTrailer(IntPtr pInProcessHandler, byte* pHeaderName, byte* pHeaderValue, ushort length)
+        internal static unsafe void HttpResponseSetTrailer(IntPtr pInProcessHandler, byte* pHeaderName, byte* pHeaderValue, ushort length)
         {
-            Validate(http_response_set_unknown_trailer(pInProcessHandler, pHeaderName, pHeaderValue, length));
+            Validate(http_response_set_trailer(pInProcessHandler, pHeaderName, pHeaderValue, length));
         }
 
         internal static unsafe bool HttpSupportTrailer(IntPtr pInProcessHandler)
         {
             bool supportsTrailers;
-            Validate(http_supports_trailers(pInProcessHandler, out supportsTrailers));
+            Validate(http_has_response4(pInProcessHandler, out supportsTrailers));
             return supportsTrailers;
         }
 

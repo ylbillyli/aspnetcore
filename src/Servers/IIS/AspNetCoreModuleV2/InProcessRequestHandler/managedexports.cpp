@@ -562,7 +562,7 @@ http_set_startup_error_page_content(_In_ byte* errorPageContent, int length)
 
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT
 HRESULT
-http_supports_trailers(
+http_has_response4(
     _In_ IN_PROCESS_HANDLER* pInProcessHandler,
     _Out_ BOOL* supportsTrailers
 )
@@ -577,7 +577,7 @@ http_supports_trailers(
 
 EXTERN_C __MIDL_DECLSPEC_DLLEXPORT
 HRESULT
-http_response_set_unknown_trailer(
+http_response_set_trailer(
     _In_ IN_PROCESS_HANDLER* pInProcessHandler,
     _In_ PCSTR pszHeaderName,
     _In_ PCSTR pszHeaderValue,

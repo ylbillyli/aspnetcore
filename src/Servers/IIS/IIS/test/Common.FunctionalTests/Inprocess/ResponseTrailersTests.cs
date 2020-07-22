@@ -31,6 +31,20 @@ namespace Microsoft.AspNetCore.Server.IIS.FunctionalTests
             var response = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_HTTP2_TrailersAvailable");
 
             response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpVersion.Version11, response.Version);
+            Assert.Empty(response.TrailingHeaders);
+        }
+
+        [ConditionalFact]
+        public async Task ResponseTrailers_HTTP1_TrailersNotAvailable()
+        {
+            var deploymentParameters = Fixture.GetBaseDeploymentParameters(hostingModel: IntegrationTesting.HostingModel.OutOfProcess);
+
+            var deploymentResult = await DeployAsync(deploymentParameters);
+
+            var response = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_HTTP1_TrailersNotAvailable");
+
+            response.EnsureSuccessStatusCode();
             Assert.Equal(HttpVersion.Version20, response.Version);
             Assert.Empty(response.TrailingHeaders);
         }
@@ -136,23 +150,18 @@ namespace Microsoft.AspNetCore.Server.IIS.FunctionalTests
         }
 
         [ConditionalFact]
-        public async Task ResponseTrailers_WithContentLengthBodyAndDeclaredButMissingTrailers_Completes()
+        public async Task ResponseTrailers_MultipleValues_SentAsSeparateHeaders()
         {
-            var body = "Hello World";
-
             var deploymentParameters = GetHttpsDeploymentParameters();
             var deploymentResult = await DeployAsync(deploymentParameters);
 
-            var response = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_WithContentLengthBodyAndDeclaredButMissingTrailers_Completes");
+            var response = await SendRequestAsync(deploymentResult.HttpClient.BaseAddress.ToString() + "ResponseTrailers_MultipleValues_SentAsSeparateHeaders");
 
             response.EnsureSuccessStatusCode();
             Assert.Equal(HttpVersion.Version20, response.Version);
-            // Avoid HttpContent's automatic content-length calculation.
-            Assert.True(response.Content.Headers.TryGetValues(HeaderNames.ContentLength, out var contentLength), HeaderNames.ContentLength);
-            Assert.Equal(body.Length.ToString(CultureInfo.InvariantCulture), contentLength.First());
-            Assert.Equal("TrailerName", response.Headers.Trailer.Single());
-            Assert.Equal(body, await response.Content.ReadAsStringAsync());
-            Assert.Empty(response.TrailingHeaders);
+            Assert.NotEmpty(response.TrailingHeaders);
+
+            Assert.Equal(new[] { "TrailerValue0", "TrailerValue1" }, response.TrailingHeaders.GetValues("TrailerName"));
         }
 
         private IISDeploymentParameters GetHttpsDeploymentParameters()

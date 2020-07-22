@@ -445,6 +445,7 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
                 {
                     var builder = new StringBuilder();
                     builder.Append(headerValues[0]);
+
                     for (var i = 1; i < headerValues.Count; i++)
                     {
                         builder.Append(',');
@@ -457,10 +458,10 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
                 var headerValueBytes = Encoding.UTF8.GetBytes(headerValue);
                 fixed (byte* pHeaderValue = headerValueBytes)
                 {
-                    var headerNameBytes = Encoding.UTF8.GetBytes(headerPair.Key);
+                    var headerNameBytes = Encoding.ASCII.GetBytes(headerPair.Key);
                     fixed (byte* pHeaderName = headerNameBytes)
                     {
-                        NativeMethods.HttpResponseSetUnknownTrailer(_pInProcessHandler, pHeaderName, pHeaderValue, (ushort)headerValueBytes.Length);
+                        NativeMethods.HttpResponseSetTrailer(_pInProcessHandler, pHeaderName, pHeaderValue, (ushort)headerValueBytes.Length);
                     }
                 }
             }
@@ -663,7 +664,7 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
             }
             catch (Exception ex)
             {
-               _logger.LogError(0, ex, $"Unexpected exception in {nameof(IISHttpContext)}.{nameof(HandleRequest)}.");
+                _logger.LogError(0, ex, $"Unexpected exception in {nameof(IISHttpContext)}.{nameof(HandleRequest)}.");
             }
             finally
             {
