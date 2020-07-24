@@ -133,7 +133,7 @@ namespace Microsoft.AspNetCore.Http
 
         public bool TryGetValue(string key, out string value)
         {
-            if (Store == null || key == null)
+            if (Store == null)
             {
                 value = null;
                 return false;
