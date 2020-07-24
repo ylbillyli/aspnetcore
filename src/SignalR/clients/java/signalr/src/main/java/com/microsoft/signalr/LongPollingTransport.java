@@ -47,12 +47,12 @@ class LongPollingTransport implements Transport {
         return this.active;
     }
 
-    private Single updateHeaderToken() {
-        return this.accessTokenProvider.flatMap((token) -> {
+    private Completable updateHeaderToken() {
+        return this.accessTokenProvider.flatMapCompletable((token) -> {
             if (!token.isEmpty()) {
                 this.headers.put("Authorization", "Bearer " + token);
             }
-            return Single.just("");
+            return Completable.complete();
         });
     }
 
@@ -63,7 +63,7 @@ class LongPollingTransport implements Transport {
         this.url = url;
         pollUrl = url + "&_=" + System.currentTimeMillis();
         logger.debug("Polling {}.", pollUrl);
-        return this.updateHeaderToken().flatMapCompletable((r) -> {
+        return this.updateHeaderToken().andThen(Completable.defer(() -> {
             HttpRequest request = new HttpRequest();
             request.addHeaders(headers);
             return this.pollingClient.get(pollUrl, request).flatMapCompletable(response -> {
@@ -75,18 +75,25 @@ class LongPollingTransport implements Transport {
                     this.active = true;
                 }
                 this.threadPool = Executors.newCachedThreadPool();
-                threadPool.execute(() -> poll(url).subscribeWith(receiveLoop));
+                threadPool.execute(() -> {
+                    poll(url)
+                    .onErrorResumeNext(e ->
+                    {
+                        return this.stop();
+                    })
+                    .subscribeWith(receiveLoop);
+                });
 
                 return Completable.complete();
             });
-        });
+        }));
     }
 
     private Completable poll(String url) {
         if (this.active) {
             pollUrl = url + "&_=" + System.currentTimeMillis();
             logger.debug("Polling {}.", pollUrl);
-            return this.updateHeaderToken().flatMapCompletable((x) -> {
+            return this.updateHeaderToken().andThen(Completable.defer(() -> {
                 HttpRequest request = new HttpRequest();
                 request.addHeaders(headers);
                 Completable pollingCompletable = this.pollingClient.get(pollUrl, request).flatMapCompletable(response -> {
@@ -109,7 +116,7 @@ class LongPollingTransport implements Transport {
                 });
 
                 return pollingCompletable;
-            });
+            }));
         } else {
             logger.debug("Long Polling transport polling complete.");
             receiveLoop.onComplete();
@@ -125,11 +132,11 @@ class LongPollingTransport implements Transport {
         if (!this.active) {
             return Completable.error(new Exception("Cannot send unless the transport is active."));
         }
-        return this.updateHeaderToken().flatMapCompletable((x) -> {
+        return this.updateHeaderToken().andThen(Completable.defer(() -> {
             HttpRequest request = new HttpRequest();
             request.addHeaders(headers);
             return Completable.fromSingle(this.client.post(url, message, request));
-        });
+        }));
     }
 
     @Override
@@ -150,23 +157,29 @@ class LongPollingTransport implements Transport {
 
     @Override
     public Completable stop() {
-        if (!stopCalled.get()) {
-            this.stopCalled.set(true);
+        if (stopCalled.compareAndSet(false, true)) {
             this.active = false;
-            return this.updateHeaderToken().flatMapCompletable((x) -> {
+            return this.updateHeaderToken().doOnComplete(() -> {
                 HttpRequest request = new HttpRequest();
                 request.addHeaders(headers);
                 this.pollingClient.delete(this.url, request);
+            }).andThen(Completable.defer(() -> {
                 CompletableSubject stopCompletableSubject = CompletableSubject.create();
                 return this.receiveLoop.andThen(Completable.defer(() -> {
-                    logger.info("LongPolling transport stopped.");
-                    this.onReceiveThread.shutdown();
-                    this.threadPool.shutdown();
-                    this.onClose.invoke(this.closeError);
+                    cleanup(this.closeError);
                     return Completable.complete();
                 })).subscribeWith(stopCompletableSubject);
+            })).doOnError(e -> {
+                cleanup(e.getMessage());
             });
         }
         return Completable.complete();
+    }
+
+    private void cleanup(String error) {
+        logger.info("LongPolling transport stopped.");
+        this.onReceiveThread.shutdown();
+        this.threadPool.shutdown();
+        this.onClose.invoke(error);
     }
 }
