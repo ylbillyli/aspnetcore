@@ -436,27 +436,20 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
                     continue;
                 }
 
-                string headerValue;
-                if (headerValues.Count == 1)
-                {
-                    headerValue = headerValues[0];
-                }
-                else
+                var headerNameBytes = Encoding.ASCII.GetBytes(headerPair.Key);
+                fixed (byte* pHeaderName = headerNameBytes)
                 {
                     for (var i = 0; i < headerValues.Count; i++)
                     {
-                        string aHeaderValue = headerValues[i];
-                        var headerValueBytes = Encoding.UTF8.GetBytes(aHeaderValue);
+                        string headerValue = headerValues[i];
+                        var headerValueBytes = Encoding.UTF8.GetBytes(headerValue);
                         fixed (byte* pHeaderValue = headerValueBytes)
                         {
-                            var headerNameBytes = Encoding.ASCII.GetBytes(headerPair.Key);
-                            fixed (byte* pHeaderName = headerNameBytes)
-                            {
-                                NativeMethods.HttpResponseSetTrailer(_pInProcessHandler, pHeaderName, pHeaderValue, (ushort)headerValueBytes.Length, false);
-                            }
+                            NativeMethods.HttpResponseSetTrailer(_pInProcessHandler, pHeaderName, pHeaderValue, (ushort)headerValueBytes.Length, false);
                         }
                     }
                 }
+
             }
         }
 
