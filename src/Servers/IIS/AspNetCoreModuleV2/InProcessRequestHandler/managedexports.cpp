@@ -49,7 +49,8 @@ public:
         SetTrailer(
             _In_ PCSTR  pszHeaderName,
             _In_ PCSTR  pszHeaderValue,
-            _In_ USHORT cchHeaderValue
+            _In_ USHORT cchHeaderValue,
+            BOOL fReplace
         ) = 0;
 };
 
@@ -581,10 +582,11 @@ http_response_set_trailer(
     _In_ IN_PROCESS_HANDLER* pInProcessHandler,
     _In_ PCSTR pszHeaderName,
     _In_ PCSTR pszHeaderValue,
-    _In_ USHORT usHeaderValueLength)
+    _In_ USHORT usHeaderValueLength,
+    BOOL fReplace)
 {
     // always unknown
     IHttpResponse4* pHttpResponse = (IHttpResponse4*)pInProcessHandler->QueryHttpContext()->GetResponse();
-    return pHttpResponse->SetTrailer(pszHeaderName, pszHeaderValue, usHeaderValueLength);
+    return pHttpResponse->SetTrailer(pszHeaderName, pszHeaderValue, usHeaderValueLength, fReplace);
 }
 // End of export

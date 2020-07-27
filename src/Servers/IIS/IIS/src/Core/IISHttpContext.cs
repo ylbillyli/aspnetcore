@@ -443,25 +443,18 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
                 }
                 else
                 {
-                    var builder = new StringBuilder();
-                    builder.Append(headerValues[0]);
-
-                    for (var i = 1; i < headerValues.Count; i++)
+                    for (var i = 0; i < headerValues.Count; i++)
                     {
-                        builder.Append(',');
-                        builder.Append(headerValues[i]);
-                    }
-
-                    headerValue = builder.ToString();
-                }
-
-                var headerValueBytes = Encoding.UTF8.GetBytes(headerValue);
-                fixed (byte* pHeaderValue = headerValueBytes)
-                {
-                    var headerNameBytes = Encoding.ASCII.GetBytes(headerPair.Key);
-                    fixed (byte* pHeaderName = headerNameBytes)
-                    {
-                        NativeMethods.HttpResponseSetTrailer(_pInProcessHandler, pHeaderName, pHeaderValue, (ushort)headerValueBytes.Length);
+                        string aHeaderValue = headerValues[i];
+                        var headerValueBytes = Encoding.UTF8.GetBytes(aHeaderValue);
+                        fixed (byte* pHeaderValue = headerValueBytes)
+                        {
+                            var headerNameBytes = Encoding.ASCII.GetBytes(headerPair.Key);
+                            fixed (byte* pHeaderName = headerNameBytes)
+                            {
+                                NativeMethods.HttpResponseSetTrailer(_pInProcessHandler, pHeaderName, pHeaderValue, (ushort)headerValueBytes.Length, false);
+                            }
+                        }
                     }
                 }
             }
