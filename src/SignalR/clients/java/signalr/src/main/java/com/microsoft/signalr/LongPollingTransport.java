@@ -48,12 +48,11 @@ class LongPollingTransport implements Transport {
     }
 
     private Completable updateHeaderToken() {
-        return this.accessTokenProvider.flatMapCompletable((token) -> {
+        return this.accessTokenProvider.doOnSuccess((token) -> {
             if (!token.isEmpty()) {
                 this.headers.put("Authorization", "Bearer " + token);
             }
-            return Completable.complete();
-        });
+        }).ignoreElement();
     }
 
     @Override
@@ -135,7 +134,7 @@ class LongPollingTransport implements Transport {
         return this.updateHeaderToken().andThen(Completable.defer(() -> {
             HttpRequest request = new HttpRequest();
             request.addHeaders(headers);
-            return Completable.fromSingle(this.client.post(url, message, request));
+            return this.client.post(url, message, request).ignoreElement();
         }));
     }
 
@@ -165,10 +164,9 @@ class LongPollingTransport implements Transport {
                 this.pollingClient.delete(this.url, request);
             }).andThen(Completable.defer(() -> {
                 CompletableSubject stopCompletableSubject = CompletableSubject.create();
-                return this.receiveLoop.andThen(Completable.defer(() -> {
+                return this.receiveLoop.doOnComplete(() -> {
                     cleanup(this.closeError);
-                    return Completable.complete();
-                })).subscribeWith(stopCompletableSubject);
+                }).subscribeWith(stopCompletableSubject);
             })).doOnError(e -> {
                 cleanup(e.getMessage());
             });
