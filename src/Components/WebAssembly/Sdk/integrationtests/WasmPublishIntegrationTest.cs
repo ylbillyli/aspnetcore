@@ -321,6 +321,8 @@ namespace Microsoft.AspNetCore.Razor.Design.IntegrationTests
             project.AddProjectFileContent(
 @"
 <PropertyGroup>
+    <!-- Workaround for https://github.com/mono/linker/issues/1390 -->
+    <PublishTrimmed>false</PublishTrimmed>
     <DefineConstants>$(DefineConstants);REFERENCE_classlibrarywithsatelliteassemblies</DefineConstants>
 </PropertyGroup>
 <ItemGroup>
@@ -450,6 +452,8 @@ namespace Microsoft.AspNetCore.Razor.Design.IntegrationTests
             wasmProject.AddProjectFileContent(
 @"
 <PropertyGroup>
+    <!-- Workaround for https://github.com/mono/linker/issues/1390 -->
+    <PublishTrimmed>false</PublishTrimmed>
     <DefineConstants>$(DefineConstants);REFERENCE_classlibrarywithsatelliteassemblies</DefineConstants>
 </PropertyGroup>
 <ItemGroup>
@@ -701,6 +705,8 @@ namespace Microsoft.AspNetCore.Razor.Design.IntegrationTests
             var existing = File.ReadAllText(blazorwasmProjFile);
             var updatedContent = @"
         <PropertyGroup>
+            <!-- Workaround for https://github.com/mono/linker/issues/1390 -->
+            <PublishTrimmed>false</PublishTrimmed>
             <DefineConstants>$(DefineConstants);REFERENCE_classlibrarywithsatelliteassemblies</DefineConstants>
         </PropertyGroup>
         <ItemGroup>

@@ -37,11 +37,6 @@
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\src\BootJsonData.cs" LinkBase="Wasm" />
-    <Compile Include="..\src\AssetsManifestFile.cs" LinkBase="Wasm" />
-  </ItemGroup>
-
   <Target Name="GenerateTestData" BeforeTargets="GetAssemblyAttributes">
     <Exec Condition="'$(OS)' == 'Windows_NT'" Command="&quot;$(NuGetPackageRoot)vswhere\$(VSWhereVersion)\tools\vswhere.exe&quot; -latest -prerelease -property installationPath -requires Microsoft.Component.MSBuild" ConsoleToMsBuild="true" StandardErrorImportance="high">
       <Output TaskParameter="ConsoleOutput" PropertyName="_VSInstallDir" />

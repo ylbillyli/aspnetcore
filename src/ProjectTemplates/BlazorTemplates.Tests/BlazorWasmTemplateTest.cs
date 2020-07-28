@@ -44,7 +44,6 @@ namespace Templates.Test
         public async Task BlazorWasmStandaloneTemplate_Works()
         {
             var project = await ProjectFactory.GetOrCreateProject("blazorstandalone", Output);
-            project.RuntimeIdentifier = "browser-wasm";
 
             var createResult = await project.RunDotNetNewAsync("blazorwasm");
             Assert.True(0 == createResult.ExitCode, ErrorMessages.GetFailedProcessMessage("create/restore", project, createResult));
@@ -136,7 +135,6 @@ namespace Templates.Test
         public async Task BlazorWasmStandalonePwaTemplate_Works()
         {
             var project = await ProjectFactory.GetOrCreateProject("blazorstandalonepwa", Output);
-            project.RuntimeIdentifier = "browser-wasm";
 
             var createResult = await project.RunDotNetNewAsync("blazorwasm", args: new[] { "--pwa" });
             Assert.True(0 == createResult.ExitCode, ErrorMessages.GetFailedProcessMessage("create/restore", project, createResult));
@@ -337,7 +335,6 @@ namespace Templates.Test
         public async Task BlazorWasmStandaloneTemplate_IndividualAuth_Works()
         {
             var project = await ProjectFactory.GetOrCreateProject("blazorstandaloneindividual", Output);
-            project.RuntimeIdentifier = "browser-wasm";
 
             var createResult = await project.RunDotNetNewAsync("blazorwasm", args: new[] {
                 "-au",
