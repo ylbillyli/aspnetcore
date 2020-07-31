@@ -55,7 +55,8 @@ namespace Microsoft.AspNetCore.Components.Rendering
             }
 
             _openElementIndices.Push(_entries.Count);
-            AppendNonAttribute(RenderTreeFrame.Element(sequence, elementName));
+            _entries.Append(RenderTreeFrame.Element(sequence, elementName));
+            _lastNonAttributeFrameType = RenderTreeFrameType.Element;
             ProfilingEnd();
         }
 
@@ -87,7 +88,8 @@ namespace Microsoft.AspNetCore.Components.Rendering
         public void AddMarkupContent(int sequence, string? markupContent)
         {
             ProfilingStart();
-            AppendNonAttribute(RenderTreeFrame.Markup(sequence, markupContent ?? string.Empty));
+            _entries.Append(RenderTreeFrame.Markup(sequence, markupContent ?? string.Empty));
+            _lastNonAttributeFrameType = RenderTreeFrameType.Markup;
             ProfilingEnd();
         }
 
@@ -99,7 +101,8 @@ namespace Microsoft.AspNetCore.Components.Rendering
         public void AddContent(int sequence, string? textContent)
         {
             ProfilingStart();
-            AppendNonAttribute(RenderTreeFrame.Text(sequence, textContent ?? string.Empty));
+            _entries.Append(RenderTreeFrame.Text(sequence, textContent ?? string.Empty));
+            _lastNonAttributeFrameType = RenderTreeFrameType.Text;
             ProfilingEnd();
         }
 
@@ -578,7 +581,8 @@ namespace Microsoft.AspNetCore.Components.Rendering
             }
 
             _openElementIndices.Push(_entries.Count);
-            AppendNonAttribute(RenderTreeFrame.ChildComponent(sequence, componentType));
+            _entries.Append(RenderTreeFrame.ChildComponent(sequence, componentType));
+            _lastNonAttributeFrameType = RenderTreeFrameType.Component;
             ProfilingEnd();
         }
 
@@ -615,7 +619,8 @@ namespace Microsoft.AspNetCore.Components.Rendering
                 throw new InvalidOperationException($"Element reference captures may only be added as children of frames of type {RenderTreeFrameType.Element}");
             }
 
-            AppendNonAttribute(RenderTreeFrame.ElementReferenceCapture(sequence, elementReferenceCaptureAction));
+            _entries.Append(RenderTreeFrame.ElementReferenceCapture(sequence, elementReferenceCaptureAction));
+            _lastNonAttributeFrameType = RenderTreeFrameType.ElementReferenceCapture;
             ProfilingEnd();
         }
 
@@ -639,7 +644,8 @@ namespace Microsoft.AspNetCore.Components.Rendering
                 throw new InvalidOperationException(ComponentReferenceCaptureInvalidParentMessage);
             }
 
-            AppendNonAttribute(RenderTreeFrame.ComponentReferenceCapture(sequence, componentReferenceCaptureAction, parentFrameIndexValue));
+            _entries.Append(RenderTreeFrame.ComponentReferenceCapture(sequence, componentReferenceCaptureAction, parentFrameIndexValue));
+            _lastNonAttributeFrameType = RenderTreeFrameType.ComponentReferenceCapture;
             ProfilingEnd();
         }
 
@@ -659,7 +665,8 @@ namespace Microsoft.AspNetCore.Components.Rendering
             }
 
             _openElementIndices.Push(_entries.Count);
-            AppendNonAttribute(RenderTreeFrame.Region(sequence));
+            _entries.Append(RenderTreeFrame.Region(sequence));
+            _lastNonAttributeFrameType = RenderTreeFrameType.Region;
             ProfilingEnd();
         }
 
@@ -731,12 +738,6 @@ namespace Microsoft.AspNetCore.Components.Rendering
         /// <returns>An array range of <see cref="RenderTreeFrame"/> values.</returns>
         public ArrayRange<RenderTreeFrame> GetFrames() =>
             _entries.ToRange();
-
-        private void AppendNonAttribute(in RenderTreeFrame frame)
-        {
-            _entries.Append(frame);
-            _lastNonAttributeFrameType = frame.FrameType;
-        }
 
         // Internal for testing
         internal void ProcessDuplicateAttributes(int first)
