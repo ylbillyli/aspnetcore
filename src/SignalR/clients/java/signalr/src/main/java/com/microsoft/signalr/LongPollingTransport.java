@@ -23,10 +23,10 @@ class LongPollingTransport implements Transport {
     private final HttpClient pollingClient;
     private final Map<String, String> headers;
     private static final int POLL_TIMEOUT = 100*1000;
+    private final Single<String> accessTokenProvider;
     private volatile Boolean active = false;
     private String pollUrl;
     private String closeError;
-    private Single<String> accessTokenProvider;
     private CompletableSubject receiveLoop = CompletableSubject.create();
     private ExecutorService threadPool;
     private ExecutorService onReceiveThread;
@@ -39,7 +39,6 @@ class LongPollingTransport implements Transport {
         this.client = client;
         this.pollingClient = client.cloneWithTimeOut(POLL_TIMEOUT);
         this.accessTokenProvider = accessTokenProvider;
-        this.onReceiveThread = Executors.newSingleThreadExecutor();
     }
 
     //Package private active accessor for testing.
@@ -75,11 +74,13 @@ class LongPollingTransport implements Transport {
                 }
                 this.threadPool = Executors.newCachedThreadPool();
                 threadPool.execute(() -> {
+                    this.onReceiveThread = Executors.newSingleThreadExecutor();
+                    receiveLoop.subscribe(() -> {
+                        this.stop().onErrorComplete().subscribe();
+                    }, e -> {
+                        this.stop().onErrorComplete().subscribe();
+                    });
                     poll(url)
-                    .onErrorResumeNext(e ->
-                    {
-                        return this.stop();
-                    })
                     .subscribeWith(receiveLoop);
                 });
 
@@ -119,9 +120,6 @@ class LongPollingTransport implements Transport {
         } else {
             logger.debug("Long Polling transport polling complete.");
             receiveLoop.onComplete();
-            if (!stopCalled.get()) {
-                return this.stop();
-            }
             return Completable.complete();
         }
     }
@@ -158,15 +156,14 @@ class LongPollingTransport implements Transport {
     public Completable stop() {
         if (stopCalled.compareAndSet(false, true)) {
             this.active = false;
-            return this.updateHeaderToken().doOnComplete(() -> {
+            return this.updateHeaderToken().andThen(Completable.defer(() -> {
                 HttpRequest request = new HttpRequest();
                 request.addHeaders(headers);
-                this.pollingClient.delete(this.url, request);
-            }).andThen(Completable.defer(() -> {
-                CompletableSubject stopCompletableSubject = CompletableSubject.create();
+                return this.pollingClient.delete(this.url, request).ignoreElement();
+            })).andThen(Completable.defer(() -> {
                 return this.receiveLoop.doOnComplete(() -> {
                     cleanup(this.closeError);
-                }).subscribeWith(stopCompletableSubject);
+                });
             })).doOnError(e -> {
                 cleanup(e.getMessage());
             });
@@ -176,8 +173,12 @@ class LongPollingTransport implements Transport {
 
     private void cleanup(String error) {
         logger.info("LongPolling transport stopped.");
-        this.onReceiveThread.shutdown();
-        this.threadPool.shutdown();
+        if (this.onReceiveThread != null) {
+            this.onReceiveThread.shutdown();
+        }
+        if (this.threadPool != null) {
+            this.threadPool.shutdown();
+        }
         this.onClose.invoke(error);
     }
 }
