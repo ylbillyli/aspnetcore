@@ -278,8 +278,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                         {
                             // This item moved
                             hasPermutations = true;
-                            diffContext.Edits.Append(
-                                RenderTreeEdit.PermutationListEntry(value.OldSiblingIndex, value.NewSiblingIndex));
+                            diffContext.Edits.AppendPermutationListEntry(value.OldSiblingIndex, value.NewSiblingIndex);
                         }
                     }
 
@@ -287,7 +286,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                     {
                         // It's much easier for the recipient to handle if we're explicit about
                         // when the list is finished
-                        diffContext.Edits.Append(RenderTreeEdit.PermutationListEnd());
+                        diffContext.Edits.AppendPermutationListEnd();
                     }
                 }
                 #endregion
@@ -611,7 +610,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                         if (!string.Equals(oldText, newText, StringComparison.Ordinal))
                         {
                             var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
-                            diffContext.Edits.Append(RenderTreeEdit.UpdateText(diffContext.SiblingIndex, referenceFrameIndex));
+                            diffContext.Edits.AppendUpdateText(diffContext.SiblingIndex, referenceFrameIndex);
                         }
                         diffContext.SiblingIndex++;
                         break;
@@ -624,7 +623,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                         if (!string.Equals(oldMarkup, newMarkup, StringComparison.Ordinal))
                         {
                             var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
-                            diffContext.Edits.Append(RenderTreeEdit.UpdateMarkup(diffContext.SiblingIndex, referenceFrameIndex));
+                            diffContext.Edits.AppendUpdateMarkup(diffContext.SiblingIndex, referenceFrameIndex);
                         }
                         diffContext.SiblingIndex++;
                         break;
@@ -653,7 +652,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                                 newFrameChildrenEndIndexExcl > newFrameAttributesEndIndexExcl;
                             if (hasChildrenToProcess)
                             {
-                                diffContext.Edits.Append(RenderTreeEdit.StepIn(diffContext.SiblingIndex));
+                                diffContext.Edits.AppendStepIn(diffContext.SiblingIndex);
                                 var prevSiblingIndex = diffContext.SiblingIndex;
                                 diffContext.SiblingIndex = 0;
                                 AppendDiffEntriesForRange(
@@ -743,7 +742,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
             {
                 InitializeNewAttributeFrame(ref diffContext, ref newFrame);
                 var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
-                diffContext.Edits.Append(RenderTreeEdit.SetAttribute(diffContext.SiblingIndex, referenceFrameIndex));
+                diffContext.Edits.AppendSetAttribute(diffContext.SiblingIndex, referenceFrameIndex);
 
                 // If we're replacing an old event handler ID with a new one, register the old one for disposal,
                 // plus keep track of the old->new chain until the old one is fully disposed
@@ -775,7 +774,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                     {
                         InitializeNewAttributeFrame(ref diffContext, ref newFrame);
                         var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
-                        diffContext.Edits.Append(RenderTreeEdit.SetAttribute(diffContext.SiblingIndex, referenceFrameIndex));
+                        diffContext.Edits.AppendSetAttribute(diffContext.SiblingIndex, referenceFrameIndex);
                         break;
                     }
                 case RenderTreeFrameType.Component:
@@ -783,7 +782,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                     {
                         InitializeNewSubtree(ref diffContext, newFrameIndex);
                         var referenceFrameIndex = diffContext.ReferenceFrames.Append(newTree, newFrameIndex, newFrame.ElementSubtreeLength);
-                        diffContext.Edits.Append(RenderTreeEdit.PrependFrame(diffContext.SiblingIndex, referenceFrameIndex));
+                        diffContext.Edits.AppendPrependFrame(diffContext.SiblingIndex, referenceFrameIndex);
                         diffContext.SiblingIndex++;
                         break;
                     }
@@ -802,7 +801,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                 case RenderTreeFrameType.Markup:
                     {
                         var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
-                        diffContext.Edits.Append(RenderTreeEdit.PrependFrame(diffContext.SiblingIndex, referenceFrameIndex));
+                        diffContext.Edits.AppendPrependFrame(diffContext.SiblingIndex, referenceFrameIndex);
                         diffContext.SiblingIndex++;
                         break;
                     }
@@ -831,7 +830,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
             {
                 case RenderTreeFrameType.Attribute:
                     {
-                        diffContext.Edits.Append(RenderTreeEdit.RemoveAttribute(diffContext.SiblingIndex, oldFrame.AttributeName));
+                        diffContext.Edits.AppendRemoveAttribute(diffContext.SiblingIndex, oldFrame.AttributeName);
                         if (oldFrame.AttributeEventHandlerId > 0)
                         {
                             diffContext.BatchBuilder.DisposedEventHandlerIds.Append(oldFrame.AttributeEventHandlerId);
@@ -843,7 +842,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                     {
                         var endIndexExcl = oldFrameIndex + oldFrame.ElementSubtreeLength;
                         DisposeFramesInRange(diffContext.BatchBuilder, oldTree, oldFrameIndex, endIndexExcl);
-                        diffContext.Edits.Append(RenderTreeEdit.RemoveFrame(diffContext.SiblingIndex));
+                        diffContext.Edits.AppendRemoveFrame(diffContext.SiblingIndex);
                         break;
                     }
                 case RenderTreeFrameType.Region:
@@ -860,7 +859,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
                 case RenderTreeFrameType.Text:
                 case RenderTreeFrameType.Markup:
                     {
-                        diffContext.Edits.Append(RenderTreeEdit.RemoveFrame(diffContext.SiblingIndex));
+                        diffContext.Edits.AppendRemoveFrame(diffContext.SiblingIndex);
                         break;
                     }
                 default:
@@ -894,7 +893,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
             }
             else
             {
-                diffContext.Edits.Append(RenderTreeEdit.StepOut());
+                diffContext.Edits.AppendStepOut();
             }
         }
 
@@ -1018,7 +1017,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
             public readonly RenderBatchBuilder BatchBuilder;
             public readonly RenderTreeFrame[] OldTree;
             public readonly RenderTreeFrame[] NewTree;
-            public readonly ArrayBuilder<RenderTreeEdit> Edits;
+            public readonly RenderTreeEditArrayBuilder Edits;
             public readonly ArrayBuilder<RenderTreeFrame> ReferenceFrames;
             public readonly Dictionary<string, int> AttributeDiffSet;
             public readonly StackObjectPool<Dictionary<object, KeyedItemInfo>> KeyedItemInfoDictionaryPool;
