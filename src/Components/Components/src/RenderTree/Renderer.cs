@@ -308,7 +308,8 @@ namespace Microsoft.AspNetCore.Components.RenderTree
 
             var newComponent = InstantiateComponent(frame.ComponentType);
             var newComponentState = AttachAndInitComponent(newComponent, parentComponentId);
-            frame = frame.WithComponent(newComponentState);
+            frame.ComponentState = newComponentState;
+            frame.ComponentId = newComponentState.ComponentId;
         }
 
         internal void AddToPendingTasks(Task task)
@@ -368,7 +369,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
             // NOTE: we do not to handle EventCallback<T> here. EventCallback<T> is only used when passing
             // a callback to a component, and never when used to attaching a DOM event handler.
 
-            frame = frame.WithAttributeEventHandlerId(id);
+            frame.AttributeEventHandlerId = id;
         }
 
         /// <summary>

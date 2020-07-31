@@ -537,7 +537,8 @@ namespace Microsoft.AspNetCore.Components.RenderTree
             var componentState = oldComponentFrame.ComponentState;
 
             // Preserve the actual componentInstance
-            newComponentFrame = newComponentFrame.WithComponent(componentState);
+            newComponentFrame.ComponentState = componentState;
+            newComponentFrame.ComponentId = componentState.ComponentId;
 
             // As an important rendering optimization, we want to skip parameter update
             // notifications if we know for sure they haven't changed/mutated. The
@@ -963,7 +964,7 @@ namespace Microsoft.AspNetCore.Components.RenderTree
         private static void InitializeNewElementReferenceCaptureFrame(ref DiffContext diffContext, ref RenderTreeFrame newFrame)
         {
             var newElementReference = ElementReference.CreateWithUniqueId(diffContext.Renderer.ElementReferenceContext);
-            newFrame = newFrame.WithElementReferenceCaptureId(newElementReference.Id);
+            newFrame.ElementReferenceCaptureId = newElementReference.Id;
             newFrame.ElementReferenceCaptureAction(newElementReference);
         }
 
