@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.Components.Rendering
             }
 
             _openElementIndices.Push(_entries.Count);
-            _entries.Append(RenderTreeFrame.Element(sequence, elementName));
+            _entries.AppendElement(sequence, elementName);
             _lastNonAttributeFrameType = RenderTreeFrameType.Element;
             ProfilingEnd();
         }
@@ -88,7 +88,7 @@ namespace Microsoft.AspNetCore.Components.Rendering
         public void AddMarkupContent(int sequence, string? markupContent)
         {
             ProfilingStart();
-            _entries.Append(RenderTreeFrame.Markup(sequence, markupContent ?? string.Empty));
+            _entries.AppendMarkup(sequence, markupContent ?? string.Empty);
             _lastNonAttributeFrameType = RenderTreeFrameType.Markup;
             ProfilingEnd();
         }
